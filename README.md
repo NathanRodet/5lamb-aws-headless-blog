@@ -22,10 +22,12 @@ aws configure
 ```bash
 # Create Posts table
 aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
 ```bash
 # Create Users table
+aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
@@ -59,7 +61,7 @@ aws apigateway create-rest-api --name 'api-gateway-5lamb --description 'REST API
 
 ## Medias Lambda
 
-```bash
+````bash
 # Zip Medias lambda sources
 zip -r lambdaMedias.zip .
 
@@ -73,6 +75,36 @@ aws lambda create-function --function-name medias-5lamb \
 aws lambda update-function-code --function-name medias-5lamb \
 --region eu-west-3 \
 --zip-file fileb://lambdaMedias.zip
+## Deploy AWS lambdas
+
+```bash
+# Dependancies list (Just informations)
+npm install bcrypt
+npm install uuid
+npm install @aws-sdk/client-dynamodb
+npm install @aws-sdk/lib-dynamodb
+````
+
+### Users lambda :
+
+```bash
+# Move to /users directory
+cd ./users
+
+# Install dependancies from package.json
+npm clean-install
+
+# Compress the lambda source code
+zip users.zip -r ../users
+
+# Deploy the lambda
+aws lambda create-function --function-name users-5lamb --zip-file fileb://users.zip --handler index.handler --runtime nodejs20.x --role arn:aws:iam::878901825461:role/5lamb
+```
+
+## Create an API Gateway
+
+```bash
+aws apigateway create-rest-api --name 'api-gateway-5lamb' --region eu-west-3 --endpoint-configuration  '{ "types": ["REGIONAL"] }'
 ```
 
 ## How to use the repository : ferris example
