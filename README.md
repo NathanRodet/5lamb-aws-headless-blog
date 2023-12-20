@@ -62,9 +62,9 @@ aws lambda update-function-code --function-name posts-5lamb \
 --zip-file fileb://lambdaPosts.zip
 ```
 
-## medias-5lamb - Medias CRD
+### medias-5lamb - Medias CRD
 
-````bash
+```bash
 # Zip Medias lambda sources
 zip -r lambdaMedias.zip .
 
@@ -78,15 +78,7 @@ aws lambda create-function --function-name medias-5lamb \
 aws lambda update-function-code --function-name medias-5lamb \
 --region eu-west-3 \
 --zip-file fileb://lambdaMedias.zip
-
-
-```bash
-# Dependancies list (Just informations)
-npm install bcrypt
-npm install uuid
-npm install @aws-sdk/client-dynamodb
-npm install @aws-sdk/lib-dynamodb
-````
+```
 
 ### users-5lamb - Users CRUD
 
