@@ -34,7 +34,7 @@ export const handler = async (event, context) => {
         );
         body = `Deleted item ${event.pathParameters.id}`;
         break;
-      case "GET /items/{id}":
+      case "GET /posts/{id}":
         body = await dynamo.send(
           new GetCommand({
             TableName: tableName,

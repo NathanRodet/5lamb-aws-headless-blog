@@ -60,10 +60,10 @@ aws apigateway create-rest-api --name 'api-gateway-5lamb --description 'REST API
 ## Medias Lambda
 
 ```bash
-# Zip Posts lambda sources
+# Zip Medias lambda sources
 zip -r lambdaMedias.zip .
 
-# Deploy Posts lambda
+# Deploy Medias lambda
 aws lambda create-function --function-name medias-5lamb \
 --runtime nodejs20.x --handler index.handler \
 --role arn:aws:iam::878901825461:role/5lamb \
