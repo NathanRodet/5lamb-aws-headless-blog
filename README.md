@@ -19,24 +19,32 @@ aws configure
 
 ## Create Users, Posts DynamoDB tables and S3 Bucket for media storage
 
+### Posts Table
+
 ```bash
 # Create Posts table
 aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
+### Users Table
+
 ```bash
 # Create Users table
 aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
+
+### media-bucket-5lamb - S3 Bucket
 
 ```bash
 # Create Users table
 aws s3api create-bucket --bucket media-bucket-5lamb --region eu-west-3 --create-bucket-configuration LocationConstraint=eu-west-3
 ```
 
-## Posts Lambda
+## Lambdas
+
+### posts-5lamb - Posts CRUD
 
 ```bash
 # Zip Posts lambda sources
@@ -54,12 +62,7 @@ aws lambda update-function-code --function-name posts-5lamb \
 --zip-file fileb://lambdaPosts.zip
 ```
 
-```bash
-# Deploy API Gateway
-aws apigateway create-rest-api --name 'api-gateway-5lamb --description 'REST API for headless blog' --region eu-west-3 --endpoint-configuration '{ "types": ["REGIONAL"] }'
-```
-
-## Medias Lambda
+## medias-5lamb - Medias CRD
 
 ````bash
 # Zip Medias lambda sources
@@ -75,7 +78,7 @@ aws lambda create-function --function-name medias-5lamb \
 aws lambda update-function-code --function-name medias-5lamb \
 --region eu-west-3 \
 --zip-file fileb://lambdaMedias.zip
-## Deploy AWS lambdas
+
 
 ```bash
 # Dependancies list (Just informations)
@@ -85,25 +88,28 @@ npm install @aws-sdk/client-dynamodb
 npm install @aws-sdk/lib-dynamodb
 ````
 
-### Users lambda :
+### users-5lamb - Users CRUD
 
 ```bash
-# Move to /users directory
-cd ./users
+# Zip Users lambda sources
+zip -r lambdaUsers.zip .
 
-# Install dependancies from package.json
-npm clean-install
+# Deploy Users lambda
+aws lambda create-function --function-name users-5lamb \
+--runtime nodejs20.x --handler index.handler \
+--role arn:aws:iam::878901825461:role/5lamb \
+--zip-file fileb://lambdaUsers.zip
 
-# Compress the lambda source code
-zip users.zip -r ../users
-
-# Deploy the lambda
-aws lambda create-function --function-name users-5lamb --zip-file fileb://users.zip --handler index.handler --runtime nodejs20.x --role arn:aws:iam::878901825461:role/5lamb
+# Update lambda code
+aws lambda update-function-code --function-name users-5lamb \
+--region eu-west-3 \
+--zip-file fileb://lambdaUsers.zip
 ```
 
-## Create an API Gateway
+## api-gate-5lamb - API Gateway
 
 ```bash
+# Create the REST API Gateway
 aws apigateway create-rest-api --name 'api-gateway-5lamb' --region eu-west-3 --endpoint-configuration  '{ "types": ["REGIONAL"] }'
 ```
 
