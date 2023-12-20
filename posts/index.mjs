@@ -51,12 +51,12 @@ export const handler = async (event, context) => {
         );
         body = body.Items;
         break;
-      case "PUT /posts":
+      case "PUT /posts/{id}":
         await dynamo.send(
           new PutCommand({
             TableName: tableName,
             Item: {
-              id: event.body.id,
+              id: event.pathParameters.id,
               name: event.body.name,
               description: event.body.description,
               content: event.body.content,

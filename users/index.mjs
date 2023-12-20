@@ -68,7 +68,7 @@ export const handler = async (event, context) => {
           })),
         };
         break;
-      case "PUT /users":
+      case "PUT /users/{id}":
         await dynamo.send(
           new PutCommand({
             TableName: userTableName,

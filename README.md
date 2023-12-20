@@ -45,6 +45,9 @@ aws s3api create-bucket --bucket media-bucket-5lamb --region eu-west-3 --create-
 ### posts-5lamb - Posts CRUD
 
 ```bash
+# Install dependancies
+npm clean-install
+
 # Zip Posts lambda sources
 zip -r lambdaPosts.zip .
 
@@ -63,6 +66,9 @@ aws lambda update-function-code --function-name posts-5lamb \
 ### medias-5lamb - Medias CRD
 
 ```bash
+# Install dependancies
+npm clean-install
+
 # Zip Medias lambda sources
 zip -r lambdaMedias.zip .
 
@@ -81,6 +87,9 @@ aws lambda update-function-code --function-name medias-5lamb \
 ### users-5lamb - Users CRUD
 
 ```bash
+# Install dependancies
+npm clean-install
+
 # Zip Users lambda sources
 zip -r lambdaUsers.zip .
 
@@ -101,6 +110,12 @@ aws lambda update-function-code --function-name users-5lamb \
 ```bash
 # Create the REST API Gateway
 aws apigateway create-rest-api --name 'api-gateway-5lamb' --region eu-west-3 --endpoint-configuration  '{ "types": ["REGIONAL"] }'
+
+# Fetch the API Gateway ID
+aws apigateway get-rest-apis | jq -r '.items[] | select(.name == "api-gateway-5lamb") | .id'
+
+# Create route endpoints in API Gateway
+aws apigateway create-resource --api-id $(aws apigateway get-rest-apis | jq -r '.items[] | select(.name == "api-gateway-5lamb") | .id') --authorization-type 'NONE' --target arn:aws:lambda:eu-west-3:878901825461:function:posts-5lamb
 ```
 
 ## How to use the repository : ferris example
