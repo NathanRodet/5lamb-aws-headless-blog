@@ -59,6 +59,22 @@ aws apigateway create-rest-api --name 'api-gateway-5lamb --description 'REST API
 
 ## Medias Lambda
 
+```bash
+# Zip Posts lambda sources
+zip -r lambdaMedias.zip .
+
+# Deploy Posts lambda
+aws lambda create-function --function-name medias-5lamb \
+--runtime nodejs20.x --handler index.handler \
+--role arn:aws:iam::878901825461:role/5lamb \
+--zip-file fileb://lambdaMedias.zip
+
+# Update lambda code
+aws lambda update-function-code --function-name medias-5lamb \
+--region eu-west-3 \
+--zip-file fileb://lambdaMedias.zip
+```
+
 ## How to use the repository : ferris example
 
 Be sure to replace AWS ID and lambda role in script !

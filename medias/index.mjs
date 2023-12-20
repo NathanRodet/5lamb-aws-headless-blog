@@ -49,7 +49,7 @@ export const handler = async (event, context) => {
           new GetCommand({
             TableName: tableName,
             Key: {
-              id: event.body.postId,
+              id: event.pathParameters.postId,
             },
           })
         );
@@ -88,13 +88,13 @@ export const handler = async (event, context) => {
           })
         );
         break;
-      case "POST /medias":
+      case "POST /medias/{postId}":
         parsedFile = JSON.parse(event.body.file);
 
         await BucketClient.send(
           new PutObjectCommand({
             Bucket: bucketName,
-            Key: `${event.body.postId}/${parsedFile.filename}`,
+            Key: `${event.pathParameters.postId}/${parsedFile.filename}`,
             Body: parsedFile.file,
           })
         );
@@ -103,7 +103,7 @@ export const handler = async (event, context) => {
           new GetCommand({
             TableName: tableName,
             Key: {
-              id: event.body.postId,
+              id: event.pathParameters.postId,
             },
           })
         );
