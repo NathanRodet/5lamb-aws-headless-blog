@@ -36,7 +36,7 @@ aws dynamodb create-table --table-name Users --attribute-definitions AttributeNa
 ### media-bucket-5lamb - S3 Bucket
 
 ```bash
-# Create Users table
+# Create S3 Bucket
 aws s3api create-bucket --bucket media-bucket-5lamb --region eu-west-3 --create-bucket-configuration LocationConstraint=eu-west-3
 ```
 
