@@ -11,6 +11,7 @@ An headless blog built over AWS serverless services.
 - API Gateway.
 
 ## Connect to AWS CLI
+
 ```bash
 # Configure AWS CLI with Access Key ID and Secret Access Key (we used eu-west-3 region as default)
 aws configure
@@ -20,18 +21,43 @@ aws configure
 
 ```bash
 # Create Posts table
-aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=uuid,AttributeType=S --key-schema AttributeName=uuid,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 
+aws dynamodb create-table --table-name Posts --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
 ```bash
 # Create Users table
-aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=username,AttributeType=S --key-schema AttributeName=username,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 
+aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
 ```bash
 # Create Users table
 aws s3api create-bucket --bucket media-bucket-5lamb --region eu-west-3 --create-bucket-configuration LocationConstraint=eu-west-3
 ```
+
+## Posts Lambda
+
+```bash
+# Zip Posts lambda sources
+zip -r lambdaPosts.zip .
+
+# Deploy Posts lambda
+aws lambda create-function --function-name posts-5lamb \
+--runtime nodejs20.x --handler index.handler \
+--role arn:aws:iam::878901825461:role/5lamb \
+--zip-file fileb://lambdaPosts.zip
+
+# Update lambda code
+aws lambda update-function-code --function-name posts-5lamb \
+--region eu-west-3 \
+--zip-file fileb://lambdaPosts.zip
+```
+
+```bash
+# Deploy API Gateway
+aws apigateway create-rest-api --name 'api-gateway-5lamb --description 'REST API for headless blog' --region eu-west-3 --endpoint-configuration '{ "types": ["REGIONAL"] }'
+```
+
+## Medias Lambda
 
 ## How to use the repository : ferris example
 
@@ -56,4 +82,3 @@ cd ./ferris
 # Play the lambda
 ./play.sh
 ```
-
