@@ -1,16 +1,14 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client, ListObjectsV2Command, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
-  ScanCommand,
   PutCommand,
   GetCommand,
-  DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 
 
 // S3 Bucket
-const S3_client = new S3Client({});
+const BucketClient = new S3Client({});
 const bucketName = "media-bucket-5lamb";
 
 // DynamoDB
@@ -31,6 +29,7 @@ export const handler = async (event, context) => {
   let body;
   let parsedFile;
   let post;
+  let isTruncated;
   let statusCode = 200;
   const headers = {
     "Content-Type": "application/json",
@@ -38,44 +37,67 @@ export const handler = async (event, context) => {
 
   try {
     switch (event.routeKey) {
-      case "DELETE /medias/{id}":
-        await dynamo.send(
-          new DeleteCommand({
-            TableName: tableName,
-            Key: {
-              id: event.pathParameters.id,
-            },
+      case "DELETE /medias/{postId}/{filename}":
+        await BucketClient.send(
+          new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: `${event.pathParameters.postId}/${event.pathParameters.filename}`,
           })
         );
-        body = `DELETE media ${event.pathParameters.id}`;
-        break;
-      case "GET /medias/{id}":
-        body = await dynamo.send(
+
+        post = await dynamo.send(
           new GetCommand({
             TableName: tableName,
             Key: {
-              id: event.pathParameters.id,
+              id: event.body.postId,
             },
           })
         );
-        body = body.Item;
-        break;
-      case "GET /medias":
-        body = await dynamo.send(
-          new ScanCommand({ TableName: tableName })
+
+        await dynamo.send(
+          new PutCommand({
+            TableName: tableName,
+            Item: {
+              id: post.id,
+              fileIds: post.fileIds.filter(item => item !== event.pathParameters.filename),
+            },
+          })
         );
-        body = body.Items;
+
+        body = `DELETE media ${event.pathParameters.postId}/${event.pathParameters.filename}`;
+        break;
+      case "GET /medias/{postId}":
+        while (isTruncated) {
+          const { Contents, IsTruncated, NextContinuationToken } = await BucketClient.send(
+            new ListObjectsV2Command({
+              Bucket: `${bucketName}/${event.pathParameters.postId}`,
+              MaxKeys: 20,
+            }));
+
+          const contentsList = Contents.map((c) => ` • ${c.Key}`).join("\n");
+          body += contentsList + "\n";
+          isTruncated = IsTruncated;
+          command.input.ContinuationToken = NextContinuationToken;
+        }
+        break;
+      case "GET /medias/{postId}/{filename}":
+        body = await BucketClient.send(
+          new GetObjectCommand({
+            Bucket: bucketName,
+            Key: `${event.pathParameters.postId}/${event.pathParameters.filename}`,
+          })
+        );
         break;
       case "POST /medias":
         parsedFile = JSON.parse(event.body.file);
-        // let base64File = await parsoToBase64(event.file);
 
-        await S3_client.send(
+        await BucketClient.send(
           new PutObjectCommand({
             Bucket: bucketName,
-            Key: event.postId + "/" + parsedFile.filename,
+            Key: `${event.body.postId}/${parsedFile.filename}`,
             Body: parsedFile.file,
-          }));
+          })
+        );
 
         post = await dynamo.send(
           new GetCommand({
@@ -95,7 +117,7 @@ export const handler = async (event, context) => {
             },
           })
         );
-        body = `POST media ${event.body.id}`;
+        body = `POST media ${event.pathParameters.postId}/${event.pathParameters.filename}`;
         break;
       default:
         throw new Error(`Unsupported route or HTTP method: "${event.routeKey}"`);
