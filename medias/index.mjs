@@ -59,7 +59,7 @@ export const handler = async (event, context) => {
             TableName: tableName,
             Item: {
               id: post.id,
-              fileIds: post.fileIds.filter(item => item !== event.pathParameters.filename),
+              mediaIds: post.mediaIds.filter(item => item !== event.pathParameters.filename),
             },
           })
         );
@@ -113,7 +113,7 @@ export const handler = async (event, context) => {
             TableName: tableName,
             Item: {
               id: post.id,
-              fileIds: post.fileIds.push(parsedBody.filename),
+              mediaIds: post.mediaIds.push(parsedBody.filename),
             },
           })
         );

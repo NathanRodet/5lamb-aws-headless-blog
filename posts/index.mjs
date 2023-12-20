@@ -77,7 +77,7 @@ export const handler = async (event, context) => {
               description: event.body.description,
               content: event.body.content,
               ownerId: event.body.ownerId,
-              mediaIds: event.body.mediaIds,
+              mediaIds: null,
               editorIds: event.body.ownerId
             },
           })
