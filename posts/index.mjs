@@ -22,8 +22,8 @@ export const handler = async (event, context) => {
   };
 
   try {
-    switch (event.routeKey) {
-      case "DELETE /posts/{id}":
+    switch (true) {
+      case event.httpMethod === "DELETE" && event.pathParameters.id !== null:
         await dynamo.send(
           new DeleteCommand({
             TableName: tableName,
@@ -34,7 +34,11 @@ export const handler = async (event, context) => {
         );
         body = `Deleted item ${event.pathParameters.id}`;
         break;
-      case "GET /posts/{id}":
+      case event.httpMethod === "GET" && event.path === "/posts":
+        const { Items } = await dynamo.send(new ScanCommand({ TableName: tableName }));
+        body = Items;
+        break;
+      case event.httpMethod === "GET" && event.pathParameters !== null && event.pathParameters.id !== null:
         body = await dynamo.send(
           new GetCommand({
             TableName: tableName,
@@ -45,47 +49,45 @@ export const handler = async (event, context) => {
         );
         body = body.Item;
         break;
-      case "GET /posts":
-        body = await dynamo.send(
-          new ScanCommand({ TableName: tableName })
-        );
-        body = body.Items;
-        break;
-      case "PUT /posts/{id}":
+
+      case event.httpMethod === "PUT" && event.pathParameters.id !== null:
+        const updateBody = JSON.parse(event.body);
         await dynamo.send(
           new PutCommand({
             TableName: tableName,
             Item: {
               id: event.pathParameters.id,
-              name: event.body.name,
-              description: event.body.description,
-              content: event.body.content,
-              mediaIds: event.body.mediaIds,
-              editorIds: event.body.ownerId
+              name: updateBody.title,
+              description: updateBody.description,
+              content: updateBody.content,
+              ownerId: updateBody.ownerId,
+              mediaIds: updateBody.mediaId | null,
+              editorIds: updateBody.ownerId
             },
           })
         );
-        body = `PUT item ${event.body.id}`;
+        body = `PUT item `;
         break;
-      case "POST /posts":
+        case event.httpMethod === "POST" && event.path === "/posts":
+        const postsBody = JSON.parse(event.body);
         await dynamo.send(
           new PutCommand({
             TableName: tableName,
             Item: {
               id: uuidv4(),
-              name: event.body.name,
-              description: event.body.description,
-              content: event.body.content,
-              ownerId: event.body.ownerId,
+              name: postsBody.title,
+              description: postsBody.description,
+              content: postsBody.content,
+              ownerId: postsBody.ownerId,
               mediaIds: null,
-              editorIds: event.body.ownerId
+              editorIds: postsBody.ownerId
             },
           })
         );
-        body = `POST item ${event.body.id}`;
+        body = `POST item`;
         break;
       default:
-        throw new Error(`Unsupported route: "${event.routeKey}"`);
+        throw new Error(`Unsupported route: "${event.path}"`);
     }
   } catch (err) {
     statusCode = 400;

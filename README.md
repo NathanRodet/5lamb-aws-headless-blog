@@ -58,9 +58,7 @@ aws lambda create-function --function-name posts-5lamb \
 --zip-file fileb://lambdaPosts.zip
 
 # Update lambda code
-aws lambda update-function-code --function-name posts-5lamb \
---region eu-west-3 \
---zip-file fileb://lambdaPosts.zip
+aws lambda update-function-code --function-name posts-5lamb --region eu-west-3 --zip-file fileb://lambdaPosts.zip
 ```
 
 ### medias-5lamb - Medias CRD
