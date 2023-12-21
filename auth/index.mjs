@@ -6,23 +6,31 @@
 // string, the authorizer function returns an HTTP 401 status code. For any other token value, 
 // the authorizer returns an HTTP 500 status code. 
 // Note that token values are case-sensitive.
+import jwt from "jsonwebtoken";
 
 const signature_key = "secret1Signature2Key3";
 
 export const handler = function (event, context, callback) {
   let token = event.authorizationToken;
-  switch (token) {
-    case 'allow':
-      callback(null, generatePolicy('user', 'Allow', event.methodArn));
-      break;
-    case 'deny':
-      callback(null, generatePolicy('user', 'Deny', event.methodArn));
-      break;
-    case 'unauthorized':
-      callback("Unauthorized");   // Return a 401 Unauthorized response
-      break;
-    default:
+
+  try {
+    const decodedToken = jwt.verify(token, signature_key);
+    // Token is valid, generate an 'Allow' policy
+
+    // TO SCOPE THE POLICY WITH RESSOURCES MODIFY THE FOLLOWING LINE WITH THIS EXAMPLE
+    //   const policy = generatePolicy(decodedToken.name, 'Allow', 'users/*');
+    const policy = generatePolicy(decodedToken.name, 'Allow', '*');
+    policy.context = { name: decodedToken.name, role: decodedToken.role };
+
+
+    callback(null, policy);
+  } catch (error) {
+    // Token is invalid or expired
+    if (error.name === 'TokenExpiredError') {
+      callback("Unauthorized"); // Return a 401 Unauthorized response
+    } else {
       callback("Error: Invalid token"); // Return a 500 Invalid token response
+    }
   }
 };
 
@@ -43,10 +51,5 @@ const generatePolicy = function (principalId, effect, resource) {
     authResponse.policyDocument = policyDocument;
   }
 
-  // Optional output with custom properties of the String, Number or Boolean type.
-  authResponse.context = {
-    "userId": "from_token",
-    "roles": "from_token"
-  };
   return authResponse;
 }

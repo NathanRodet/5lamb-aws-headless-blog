@@ -33,20 +33,21 @@ export const handler = async (event, context) => {
   try {
     switch (true) {
       case event.httpMethod === "POST" && event.path === "/login":
+        const parsedBody = JSON.parse(event.body);
         body = await dynamo.send(
           new GetCommand({
             TableName: tableName,
             Key: {
-              name: event.body.name,
+              name: parsedBody.name,
             },
           })
         );
 
-        if (event.body.password === body.Item.password && event.body.name === body.Item.name) {
+        if (body.Item.password === parsedBody.password && body.Item.name === parsedBody.name) {
           const token = jwt.sign(
             {
-              name: event.body.name,
-              roles: body.Item.roles,
+              name: parsedBody.name,
+              role: body.Item.role,
             },
             signature_key
           );
