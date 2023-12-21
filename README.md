@@ -114,12 +114,10 @@ zip -r lambdaAuth.zip .
 aws lambda create-function --function-name auth-5lamb --runtime nodejs20.x --handler index.handler --role arn:aws:iam::878901825461:role/5lamb --zip-file fileb://lambdaAuth.zip
 
 # Update lambda code
-aws lambda update-function-code --function-name auth-5lamb \
---region eu-west-3 \
---zip-file fileb://lambdaAuth.zip
+aws lambda update-function-code --function-name auth-5lamb --region eu-west-3 --zip-file fileb://lambdaAuth.zip
 ```
 
-### auth-5lamb - Login
+### login-5lamb - Login
 
 ```bash
 # Install dependancies
