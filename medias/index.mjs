@@ -29,7 +29,7 @@ export const handler = async (event, context) => {
   let body;
   let parsedFile;
   let post;
-  let isTruncated;
+  let isTruncated = true;
   let statusCode = 200;
   const headers = {
     "Content-Type": "application/json",

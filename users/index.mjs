@@ -29,6 +29,9 @@ export const handler = async (event, context) => {
     "Content-Type": "application/json",
   };
 
+  console.log(event.routeKey)
+  console.log(event)
+
   try {
     switch (event.routeKey) {
       case "DELETE /users/{id}":
@@ -73,7 +76,7 @@ export const handler = async (event, context) => {
           new PutCommand({
             TableName: userTableName,
             Item: {
-              id: event.body.id,
+              id: event.pathParameters.id,
               password: hashPassword(event.body.password),
             },
           })
