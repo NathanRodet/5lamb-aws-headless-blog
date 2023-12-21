@@ -12,8 +12,6 @@ const client = new DynamoDBClient({});
 
 const dynamo = DynamoDBDocumentClient.from(client);
 
-
-
 export const hashPassword = async (password) => {
   const hiddenSecretSalt = "ranDom1SecRet2SalT3";
 
@@ -65,42 +63,34 @@ export const handler = async (event, context) => {
 
         break;
       case event.httpMethod === "GET" && event.path === "/users":
-        body = await dynamo.send(
-          new ScanCommand({ TableName: userTableName })
-        );
-
-        body = {
-          ...body,
-          Items: body.Items.map((item) => ({
-            ...item,
-            password: "********",
-          })),
-        };
+        const { Users } = await dynamo.send(new ScanCommand({ TableName: userTableName }));
+        body = Users;
         break;
       case event.httpMethod === "PUT" && event.pathParameters.name !== null:
-
+        const updateBody = JSON.parse(event.body);
         await dynamo.send(
           new PutCommand({
             TableName: userTableName,
             Item: {
-              name: event.pathParameters.name,
-              password: event.body.password,
+              name: event.pathParameters.name,  // Change to userId
+              ...updateBody,  // Assuming the body contains user fields or rejected by validation
             },
           })
         );
-        body = `Put user ${event.body.name} with name ${event.body.name}`;
+
+        body = `Put user password with name ${event.pathParameters.name}`;
         break;
       case event.httpMethod === "POST" && event.path === "/users":
+        const userBody = JSON.parse(event.body);
         await dynamo.send(
           new PutCommand({
             TableName: userTableName,
             Item: {
-              name: event.body.name,
-              password: event.body.password,
+              ...userBody,  // Assuming the body contains user fields
             },
           })
         );
-        body = `POST user with name ${event.body.name}`;
+        body = `POST user`;
         break;
       default:
         throw new Error(`Unsupported route`);
