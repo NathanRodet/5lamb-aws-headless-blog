@@ -5,7 +5,7 @@ An headless blog built over AWS serverless services.
 ## Core features
 
 - CRUD endpoints for users management.
-- Login / Register endpoints for authentification and RBAC for authorization.
+- Authentification with Cognito.
 - CRD endpoints for file management.
 - CRUD endpoints for blog post management.
 - API Gateway.
@@ -115,10 +115,7 @@ npm clean-install
 zip -r lambdaAuth.zip .
 
 # Deploy Users lambda
-aws lambda create-function --function-name auth-5lamb \
---runtime nodejs20.x --handler index.handler \
---role arn:aws:iam::878901825461:role/5lamb \
---zip-file fileb://lambdaAuth.zip
+aws lambda create-function --function-name auth-5lamb --runtime nodejs20.x --handler index.handler --role arn:aws:iam::878901825461:role/5lamb --zip-file fileb://lambdaAuth.zip
 
 # Update lambda code
 aws lambda update-function-code --function-name auth-5lamb \
