@@ -30,7 +30,7 @@ aws dynamodb create-table --table-name Posts --attribute-definitions AttributeNa
 
 ```bash
 # Create Users table
-aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+aws dynamodb create-table --table-name Users --attribute-definitions AttributeName=name,AttributeType=S --key-schema AttributeName=name,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 ```
 
 ### media-bucket-5lamb - S3 Bucket
@@ -100,12 +100,10 @@ aws lambda create-function --function-name users-5lamb \
 --zip-file fileb://lambdaUsers.zip
 
 # Update lambda code
-aws lambda update-function-code --function-name users-5lamb \
---region eu-west-3 \
---zip-file fileb://lambdaUsers.zip
+aws lambda update-function-code --function-name users-5lamb --region eu-west-3 --zip-file fileb://lambdaUsers.zip
 ```
 
-### auth-5lamb - Authentification
+### auth-5lamb - Authorization
 
 ```bash
 # Install dependancies
@@ -121,6 +119,22 @@ aws lambda create-function --function-name auth-5lamb --runtime nodejs20.x --han
 aws lambda update-function-code --function-name auth-5lamb \
 --region eu-west-3 \
 --zip-file fileb://lambdaAuth.zip
+```
+
+### auth-5lamb - Login
+
+```bash
+# Install dependancies
+npm clean-install
+
+# Zip Users lambda sources
+zip -r lambdaLogin.zip .
+
+# Deploy Users lambda
+aws lambda create-function --function-name login-5lamb --runtime nodejs20.x --handler index.handler --role arn:aws:iam::878901825461:role/5lamb --zip-file fileb://lambdaLogin.zip
+
+# Update lambda code
+aws lambda update-function-code --function-name login-5lamb --region eu-west-3 --zip-file fileb://lambdaLogin.zip
 ```
 
 ## api-gate-5lamb - API Gateway

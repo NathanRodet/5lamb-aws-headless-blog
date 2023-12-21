@@ -16,14 +16,6 @@ const db_client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(db_client);
 const tableName = "Posts";
 
-// export const parsoToBase64 = async (file) => {
-//   const parsedBody = JSON.parse(file.body);
-//   const base64File = parsedBody.file;
-//   const decodedFile = Buffer.from(base64File.replace(/^data:image\/\w+;base64,/, ""), "base64");
-
-//   return decodedFile;
-// };
-
 export const handler = async (event, context) => {
 
   let body;

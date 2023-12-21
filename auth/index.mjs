@@ -7,6 +7,8 @@
 // the authorizer returns an HTTP 500 status code. 
 // Note that token values are case-sensitive.
 
+const signature_key = "secret1Signature2Key3";
+
 export const handler = function (event, context, callback) {
   let token = event.authorizationToken;
   switch (token) {
@@ -43,9 +45,8 @@ const generatePolicy = function (principalId, effect, resource) {
 
   // Optional output with custom properties of the String, Number or Boolean type.
   authResponse.context = {
-    "stringKey": "stringval",
-    "numberKey": 123,
-    "booleanKey": true
+    "userId": "from_token",
+    "roles": "from_token"
   };
   return authResponse;
 }

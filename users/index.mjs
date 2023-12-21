@@ -6,63 +6,69 @@ import {
   GetCommand,
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { v4 as uuidv4 } from 'uuid';
 import bcrypt from "bcrypt";
 
 const client = new DynamoDBClient({});
 
 const dynamo = DynamoDBDocumentClient.from(client);
 
-const userTableName = "Users";
 
-const hiddenSecretSalt = "ranDom1SecRet2SalT3";
 
 export const hashPassword = async (password) => {
+  const hiddenSecretSalt = "ranDom1SecRet2SalT3";
+
   const hash = await bcrypt.hash(password, hiddenSecretSalt);
   return hash;
 };
 
 export const handler = async (event, context) => {
+
+  const userTableName = "Users";
   let body;
   let statusCode = 200;
   const headers = {
     "Content-Type": "application/json",
   };
 
-  console.log(event.routeKey)
-  console.log(event)
-
   try {
-    switch (event.routeKey) {
-      case "DELETE /users/{id}":
+    switch (true) {
+      case event.httpMethod === "DELETE" && event.pathParameters.name !== null:
         await dynamo.send(
           new DeleteCommand({
             TableName: userTableName,
             Key: {
-              id: event.pathParameters.id,
+              name: event.pathParameters.name,
             },
           })
         );
-        body = `Deleted user ${event.pathParameters.id}`;
+        body = `Deleted user ${event.pathParameters.name}`;
         break;
-      case "GET /users/{id}":
+      case event.httpMethod === "GET" && event.pathParameters.name !== null:
         body = await dynamo.send(
           new GetCommand({
             TableName: userTableName,
             Key: {
-              id: event.pathParameters.id,
+              name: event.pathParameters.name,
             },
           })
         );
-        body = {
-          ...body.Item,
-          password: "********",
-        };
+
+        if (!body.Item) {
+          statusCode = 404;
+          body = `User ${event.pathParameters.name} not found`;
+        } else {
+          body = {
+            ...body.Item,
+            password: "********",
+          };
+        }
+
         break;
-      case "GET /users":
+      case event.httpMethod === "GET" && event.path === "/users":
         body = await dynamo.send(
           new ScanCommand({ TableName: userTableName })
         );
+
         body = {
           ...body,
           Items: body.Items.map((item) => ({
@@ -71,33 +77,33 @@ export const handler = async (event, context) => {
           })),
         };
         break;
-      case "PUT /users/{id}":
+      case event.httpMethod === "PUT" && event.pathParameters.name !== null:
+
         await dynamo.send(
           new PutCommand({
             TableName: userTableName,
             Item: {
-              id: event.pathParameters.id,
-              password: hashPassword(event.body.password),
+              name: event.pathParameters.name,
+              password: event.body.password,
             },
           })
         );
-        body = `Put user ${event.body.id} with username ${event.body.username}`;
+        body = `Put user ${event.body.name} with name ${event.body.name}`;
         break;
-      case "POST /users":
+      case event.httpMethod === "POST" && event.path === "/users":
         await dynamo.send(
           new PutCommand({
             TableName: userTableName,
             Item: {
-              id: uuidv4(),
-              username: event.body.username,
-              password: hashPassword(event.body.password),
+              name: event.body.name,
+              password: event.body.password,
             },
           })
         );
-        body = `POST user ${event.body.id} with username ${event.body.username}`;
+        body = `POST user with name ${event.body.name}`;
         break;
       default:
-        throw new Error(`Unsupported route: "${event.routeKey}"`);
+        throw new Error(`Unsupported route`);
     }
   } catch (err) {
     statusCode = 400;

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.477",
+    "@aws-sdk/client-dynamodb": "^3.478.0",
     "@aws-sdk/lib-dynamodb": "^3.477",
     "bcrypt": "^5.1",
     "uuid": "^9.0"
