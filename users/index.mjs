@@ -41,6 +41,10 @@ export const handler = async (event, context) => {
         );
         body = `Deleted user ${event.pathParameters.name}`;
         break;
+      case event.httpMethod === "GET" && event.path === "/users":
+        const { Items } = await dynamo.send(new ScanCommand({ TableName: userTableName }));
+        body = Items;
+        break;
       case event.httpMethod === "GET" && event.pathParameters.name !== null:
         body = await dynamo.send(
           new GetCommand({
@@ -61,10 +65,6 @@ export const handler = async (event, context) => {
           };
         }
 
-        break;
-      case event.httpMethod === "GET" && event.path === "/users":
-        const { Users } = await dynamo.send(new ScanCommand({ TableName: userTableName }));
-        body = Users;
         break;
       case event.httpMethod === "PUT" && event.pathParameters.name !== null:
         const updateBody = JSON.parse(event.body);
