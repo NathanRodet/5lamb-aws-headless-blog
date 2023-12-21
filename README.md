@@ -105,6 +105,27 @@ aws lambda update-function-code --function-name users-5lamb \
 --zip-file fileb://lambdaUsers.zip
 ```
 
+### auth-5lamb - Authentification
+
+```bash
+# Install dependancies
+npm clean-install
+
+# Zip Users lambda sources
+zip -r lambdaAuth.zip .
+
+# Deploy Users lambda
+aws lambda create-function --function-name auth-5lamb \
+--runtime nodejs20.x --handler index.handler \
+--role arn:aws:iam::878901825461:role/5lamb \
+--zip-file fileb://lambdaAuth.zip
+
+# Update lambda code
+aws lambda update-function-code --function-name auth-5lamb \
+--region eu-west-3 \
+--zip-file fileb://lambdaAuth.zip
+```
+
 ## api-gate-5lamb - API Gateway
 
 ```bash
