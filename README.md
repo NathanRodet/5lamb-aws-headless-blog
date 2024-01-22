@@ -1,4 +1,4 @@
-# supinfo-5lamb
+# Headless Blog - AWS Serverless Architecture
 
 An headless blog built over AWS serverless services.
 
